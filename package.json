@@ -1,14 +1,13 @@
 {
-  "name": "electron-vue-vite",
-  "version": "2.0.0",
+  "name": "crossword-manager-app",
+  "version": "1.0.0",
   "main": "dist-electron/main/index.js",
-  "description": "Really simple Electron + Vue + Vite boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "description": "app to download and open crossword puzzles in .puz format",
+  "author": "jmoore914",
   "license": "MIT",
   "private": true,
   "keywords": [
     "electron",
-    "rollup",
     "vite",
     "vue3",
     "vue"
@@ -25,8 +24,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
+    "@vue/eslint-config-typescript": "^11.0.2",
     "electron": "^23.1.1",
     "electron-builder": "^23.6.0",
+    "eslint": "^8.38.0",
+    "eslint-plugin-vue": "^9.11.0",
     "typescript": "^5.0.2",
     "vite": "^4.1.4",
     "vite-plugin-electron": "^0.11.2",
