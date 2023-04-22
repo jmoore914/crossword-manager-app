@@ -1,6 +1,11 @@
-import {app, BrowserWindow, shell, ipcMain} from 'electron';
+import {app, BrowserWindow, shell, ipcMain, Menu, MenuItem} from 'electron';
 import {release} from 'node:os';
 import {join} from 'node:path';
+
+
+
+
+
 
 // The built directory structure
 //
@@ -29,6 +34,10 @@ if (!app.requestSingleInstanceLock()) {
 	process.exit(0);
 }
 
+
+
+
+
 // Remove electron security warnings
 // This warning only shows in development mode
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
@@ -39,6 +48,8 @@ let win: BrowserWindow | null = null;
 const preload = join(__dirname, '../preload/index.js');
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, 'index.html');
+
+
 
 async function createWindow() {
 	win = new BrowserWindow({
@@ -53,6 +64,8 @@ async function createWindow() {
 			contextIsolation: false,
 		},
 	});
+	
+	
 
 	if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
 		win.loadURL(url);

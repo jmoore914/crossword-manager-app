@@ -15,14 +15,11 @@
   cursor: pointer;
 }
 
-.modal {
-  padding: 1rem;
-  background-color: #fefefe;
-  margin: 5% auto 40% auto;
-  border: 1px solid #888;
-  border-radius: 5px;
-  position: fixed;
-  max-height: 75vh;
-  overflow: auto;
-  z-index: 1000;
+.horizontallyCenter{
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.maxWidth {
+  width: 100%
 }

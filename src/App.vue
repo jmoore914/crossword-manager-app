@@ -1,11 +1,14 @@
 <template>
 	<div>
-		<img
-			:src="settingsIconSrc"
-			alt="settings"
-			class="img hoverable settingsIcon"
-			@click="openSettings"
-		>
+		<Settings />
+		<div>
+			<img
+				:src="settingsIconSrc"
+				alt="settings"
+				class="img hoverable settingsIcon"
+				@click="openSettings"
+			>
+		</div>
 	</div>
 </template>
 
@@ -14,12 +17,16 @@
 import settingsIconSrc from './assets/settingsIcon.svg';
 import fs from 'fs';
 import path from 'path';
+import {useMainStore} from './store/store';
+
+import Settings from '@/components/Settings.vue';
 
 const appData = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + '/.local/share');
-console.log(appData);
 const settingsDirectory = path.join(appData, 'CrosswordManagerApp');
-console.log(settingsDirectory);
-if(!fs.existsSync(appData)){
+console.log(fs.existsSync(settingsDirectory));
+
+if(!fs.existsSync(settingsDirectory)){
+	console.log('Creating settings directory');
 	fs.mkdirSync(settingsDirectory);
 }
 const settingsPath = path.join(settingsDirectory, 'settings.json');
@@ -29,7 +36,8 @@ if(!fs.existsSync(settingsPath)){
 }
 
 function openSettings(): void{
-	console.log('settings');
+	const store = useMainStore();
+	store.showSettings();
 }
 
 </script>
