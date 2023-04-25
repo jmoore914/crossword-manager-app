@@ -23,6 +23,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@electron/remote": "^2.0.9",
     "@vitejs/plugin-vue": "^4.1.0",
     "@vue/eslint-config-typescript": "^11.0.2",
     "electron": "^24.1.2",

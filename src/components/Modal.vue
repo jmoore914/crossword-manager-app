@@ -49,10 +49,10 @@ const emit = defineEmits<{
     height: 100%;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.4);
-    padding-top: 2vw;
+    padding-top:calc(2 * var(--base-size));
 }
 .modal {
-  padding: 1rem;
+  padding:calc(2 * var(--base-size));
   background-color: #fefefe;
   margin: 5% auto 40% auto;
   border: 1px solid #888;

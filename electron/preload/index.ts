@@ -1,3 +1,33 @@
+import {Menu, MenuItem, dialog} from '@electron/remote';
+import {contextBridge} from 'electron';
+import {PathLike, PathOrFileDescriptor} from 'original-fs';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+
+contextBridge.exposeInMainWorld('electronApi', {
+	fs: {
+		existsSync: (path: PathLike) => fs.existsSync(path),
+		mkdirSync: (path: PathLike) => fs.mkdirSync(path),
+		writeFileSync: (file: PathOrFileDescriptor, data: string | NodeJS.ArrayBufferView) => fs.writeFileSync(file, data),
+		readFileSync: (file: PathLike) => fs.readFileSync(file, 'utf8')
+	},
+	path: {
+		join: (...paths: string[]) => path.join(...paths)
+	},
+	process: {
+		env: {
+			APPDATA: process.env.APPDATA,
+			HOME: process.env.HOME,
+		},
+		platform: process.platform
+	},
+	electron: {
+		openDirectory: () => dialog.showOpenDialogSync({properties: ['openDirectory']})
+	}
+});
+
+
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
 	return new Promise((resolve) => {
 		if (condition.includes(document.readyState)) {
@@ -92,3 +122,26 @@ window.onmessage = (ev) => {
 
 
 setTimeout(removeLoading, 4999);
+
+
+let rightClickPosition = null;
+
+const remote = require('@electron/remote');
+
+
+const menu = new Menu();
+const menuItem = new MenuItem({
+	label: 'Inspect Element',
+	click: () => {
+		remote.getCurrentWindow().inspectElement(rightClickPosition.x, rightClickPosition.y);
+	}
+});
+menu.append(menuItem);
+
+window.addEventListener('contextmenu', (e) => {
+	e.preventDefault();
+	rightClickPosition = {x: e.x, y: e.y};
+	menu.popup(remote.getCurrentWindow());
+}, false);
+
+

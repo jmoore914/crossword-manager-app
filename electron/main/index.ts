@@ -1,10 +1,10 @@
-import {app, BrowserWindow, shell, ipcMain, Menu, MenuItem} from 'electron';
+import {app, BrowserWindow, shell, ipcMain} from 'electron';
 import {release} from 'node:os';
 import {join} from 'node:path';
 
+import {initialize, enable} from '@electron/remote/main';
 
-
-
+initialize();
 
 
 // The built directory structure
@@ -43,7 +43,7 @@ if (!app.requestSingleInstanceLock()) {
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
 // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-let win: BrowserWindow | null = null;
+export let win: BrowserWindow | null = null;
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js');
 const url = process.env.VITE_DEV_SERVER_URL;
@@ -51,19 +51,26 @@ const indexHtml = join(process.env.DIST, 'index.html');
 
 
 
+
+
+
+
+
+
 async function createWindow() {
 	win = new BrowserWindow({
 		title: 'Main window',
 		icon: join(process.env.PUBLIC, 'favicon.ico'),
+		width: 600,
+		height: 600,
 		webPreferences: {
 			preload,
-			// Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
-			// Consider using contextBridge.exposeInMainWorld
-			// Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
-			nodeIntegration: true,
-			contextIsolation: false,
+			sandbox: false
 		},
+		// resizable: false,
 	});
+
+	
 	
 	
 
@@ -86,6 +93,7 @@ async function createWindow() {
 		return {action: 'deny'};
 	});
 	// win.webContents.on('will-navigate', (event, url) => { }) #344
+	enable(win.webContents);
 }
 
 app.whenReady().then(createWindow);

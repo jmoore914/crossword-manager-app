@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="app">
 		<Settings />
 		<div>
 			<img
@@ -9,50 +9,86 @@
 				@click="openSettings"
 			>
 		</div>
+		<div>
+			<div class="dateSelectorGrid">
+				<div class="flexVCenter">
+					Select Date: 
+				</div>
+				<div>
+					<div class="flexVCenter">
+						<input
+							v-model="selectedDate"
+							type="date"
+							class="dateInput"
+						>
+					</div>
+				</div>
+			</div>
+		</div>
+		<Puzzles />
 	</div>
 </template>
 
 <script setup lang="ts">
 
-import settingsIconSrc from './assets/settingsIcon.svg';
-import fs from 'fs';
-import path from 'path';
-import {useMainStore} from './store/store';
+import {computed} from 'vue';
+
+import settingsIconSrc from '@/assets/settingsIcon.svg';
+import {useStore} from '@/store/store';
 
 import Settings from '@/components/Settings.vue';
+import {settingsDirectory, settingsPath} from '@/utilities/shared';
+import CenteredElement from './components/CenteredElement.vue';
+import Puzzles from './components/Puzzles.vue';
 
-const appData = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + '/.local/share');
-const settingsDirectory = path.join(appData, 'CrosswordManagerApp');
-console.log(fs.existsSync(settingsDirectory));
+const store = useStore();
 
-if(!fs.existsSync(settingsDirectory)){
-	console.log('Creating settings directory');
-	fs.mkdirSync(settingsDirectory);
-}
-const settingsPath = path.join(settingsDirectory, 'settings.json');
-if(!fs.existsSync(settingsPath)){
-	const blankSettings = {installDirectory: null, nytCookie: null};
-	fs.writeFileSync(settingsPath, JSON.stringify(blankSettings, null, 2));
-}
+
+
+const selectedDate = computed({
+	get: () => store.selectedDate,
+	set: (date: string) => store.setSelectedData(date)
+});
+
+
+store.loadSettings();
+
 
 function openSettings(): void{
-	const store = useMainStore();
-	store.showSettings();
+	store.displaySettingsModal();
 }
+
+store.loadHistory();
 
 </script>
 
 
 <style scoped>
+
+.app{
+	padding-left:calc(1 * var(--base-size));
+}
 .settingsIcon{
   position: absolute;
-  top: 1rem;
-  right: 4rem;
-  width: 3rem;
+  top:calc(1 * var(--base-size));
+  right:calc(7 * var(--base-size));
+  width:calc(5 * var(--base-size));
   aspect-ratio: 1;
 }
 
 
+
+.dateSelectorGrid{
+	display: flex;
+	column-gap:calc(3 * var(--base-size));
+	width: 100%;
+	height:calc(4 * var(--base-size));
+	padding-top:calc(3 * var(--base-size));
+}
+
+.dateSelectorLabelContainer{
+	height:calc(5 * var(--base-size));
+}
 
 </style>
 

@@ -1,10 +1,11 @@
 
 
 :root {
-  --base-font-size: 16px;
-  font-size: var(--base-font-size);
+  --base-size: 1.45vw;
+  font-size: calc(2* var(--base-size));
   font-family: Arial, Helvetica, sans-serif;
 }
+
 
 .clickable:hover{
   cursor: pointer;
@@ -15,11 +16,92 @@
   cursor: pointer;
 }
 
+.disabled:hover {
+  cursor: not-allowed;
+}
+
 .horizontallyCenter{
   left: 50%;
   transform: translateX(-50%);
 }
 
+.flexHCenter{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.flexVCenter{
+  display: flex;
+  height: 100%;
+  align-items: center;
+}
+
+.flexCenter{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
 .maxWidth {
+  width: 100%
+}
+
+.button {
+  border-radius: 6px;
+  padding:   var(--base-size) calc(1.8 * var(--base-size));
+  font-weight: bold;
+  border: none;
+  font-size: var(--base-font-size);
+}
+
+.primaryButton {
+  border: calc(.5 * var(--base-size)) solid transparent;
+  background-color: var(--buttonColor);
+  float: right;
+  color: white;
+}
+
+.secondaryButton {
+  border: calc(.5 * var(--base-size)) solid var(--buttonColor);
+  color: var(--buttonColor);
+  float: left;
+  background-color: transparent;
+}
+
+.button:disabled {
+  opacity: 0.5;
+}
+
+.redButton {
+  --buttonColor: #f89696;
+}
+
+.blueButton {
+  --buttonColor: #00aeffd8;
+}
+
+.greenButton {
+  --buttonColor: #89ce92d8;
+}
+
+.greyButton {
+  --buttonColor: #d1d1d1;
+}
+
+.darkGreyButton {
+  --buttonColor: #8a8989;
+}
+
+.textInput, .dateInput, .select {
+  font-size: var(--base-font-size);
+  font-family: Arial, Helvetica, sans-serif;
+  padding: calc(.5 * var(--base-size))
+
+}
+
+.maxWidth{
   width: 100%
 }
