@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@electron/remote": "^2.0.9",
+    "@types/python-struct": "^1.0.1",
     "@vitejs/plugin-vue": "^4.1.0",
     "@vue/eslint-config-typescript": "^11.0.2",
     "electron": "^24.1.2",
@@ -38,6 +39,9 @@
     "vue-tsc": "^1.2.0"
   },
   "dependencies": {
-    "pinia": "^2.0.35"
+    "date-fns": "^2.29.3",
+    "electron-dl": "^3.5.0",
+    "pinia": "^2.0.35",
+    "python-struct": "^1.1.3"
   }
 }

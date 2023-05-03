@@ -9,3 +9,13 @@ export function isSettings(obj: unknown): obj is Settings {
         'nytCookie' in obj && typeof obj.nytCookie === 'string' &&
         'downloadLocation' in obj && typeof obj.downloadLocation === 'string';
 }
+
+
+export function getKeys<T>(obj: T): (keyof T)[]{
+	const keys: (keyof T)[] = [];
+	let key: keyof T;
+	for(key in obj){
+		keys.push(key);
+	}
+	return keys;
+}

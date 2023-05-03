@@ -1,16 +1,21 @@
-import {Menu, MenuItem, dialog} from '@electron/remote';
-import {contextBridge} from 'electron';
+// import {Menu, MenuItem, dialog, webContents} from '@electron/remote';
+import {contextBridge, ipcRenderer} from 'electron';
 import {PathLike, PathOrFileDescriptor} from 'original-fs';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import {execSync} from 'node:child_process';
+import {fetch} from './fetch';
+import remote from '@electron/remote';
+
 
 contextBridge.exposeInMainWorld('electronApi', {
 	fs: {
 		existsSync: (path: PathLike) => fs.existsSync(path),
 		mkdirSync: (path: PathLike) => fs.mkdirSync(path),
 		writeFileSync: (file: PathOrFileDescriptor, data: string | NodeJS.ArrayBufferView) => fs.writeFileSync(file, data),
-		readFileSync: (file: PathLike) => fs.readFileSync(file, 'utf8')
+		readFileSync: (file: PathLike) => fs.readFileSync(file, 'utf8'),
+		createWriteStream: (path: PathLike) => fs.createWriteStream(path)
 	},
 	path: {
 		join: (...paths: string[]) => path.join(...paths)
@@ -22,9 +27,22 @@ contextBridge.exposeInMainWorld('electronApi', {
 		},
 		platform: process.platform
 	},
+	child_process: {
+		exec: (command: string) => execSync(command)
+	},
 	electron: {
-		openDirectory: () => dialog.showOpenDialogSync({properties: ['openDirectory']})
+		openDirectory: () => remote.dialog.showOpenDialogSync({properties: ['openDirectory']}),
+		showErrorBox: remote.dialog.showErrorBox,
+		download: (url: string, saveDir: string, fileName: string) => ipcRenderer.invoke('download', {url: url, saveDir: saveDir, fileName: fileName}),
+		fetch: fetch 
+	},
+	node: {
+		Buffer: {
+			from: (str: string, encoding: BufferEncoding) => Buffer.from(str, encoding)
+		}
 	}
+	
+	
 });
 
 
@@ -126,11 +144,10 @@ setTimeout(removeLoading, 4999);
 
 let rightClickPosition = null;
 
-const remote = require('@electron/remote');
 
 
-const menu = new Menu();
-const menuItem = new MenuItem({
+const menu = new remote.Menu();
+const menuItem = new remote.MenuItem({
 	label: 'Inspect Element',
 	click: () => {
 		remote.getCurrentWindow().inspectElement(rightClickPosition.x, rightClickPosition.y);

@@ -25,13 +25,17 @@ export const useStore = defineStore('store', {
 	},
 
 	getters: {
-		getDateHistory: (state: StoreState): DateHistory => {
-			if(state.selectedDate in state.history){
-				return state.history[state.selectedDate];
-			}
-			else{
-				return {};
-			}
+		getDateHistory: (state: StoreState) => {
+			return (date: string, puzzleName: PuzzleName): Status => {
+				if(date in state.history && puzzleName in state.history[date]){
+					return state.history[date][puzzleName];
+				}
+				else{
+					return 'missing';
+				}
+			};
+			
+			
 		}
 	},
 

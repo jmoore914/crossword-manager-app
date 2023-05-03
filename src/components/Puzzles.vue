@@ -5,13 +5,13 @@
 		</div>
 		<div class="puzzlesRow">
 			<div
-				v-for="puzzle in dailies"
-				:key="puzzle"
+				v-for="puzzle in mapPuzzles(dailyPuzzles)"
+				:key="puzzle.puzzleName"
 			>
 				<Puzzle
-					:puzzle="puzzle"
-					:status="dateHistory[puzzle]"
-					@click="puzzleClick(puzzle)"
+					:puzzle="puzzle.puzzleName"
+					:status="getPuzzleStatus(puzzle.puzzleName, puzzle.date)"
+					@click="puzzleClick(puzzle.puzzleName, puzzle.date)"
 				/>
 			</div>
 		</div>
@@ -20,13 +20,13 @@
 		</div>
 		<div class="puzzlesRow">
 			<div
-				v-for="puzzle in weeklies"
-				:key="puzzle"
+				v-for="puzzle in mapPuzzles(weekyPuzzles)"
+				:key="puzzle.puzzleName"
 			>
 				<Puzzle
-					:puzzle="puzzle"
-					:status="dateHistory[puzzle]"
-					@click="puzzleClick(puzzle)"
+					:puzzle="puzzle.puzzleName"
+					:status="getPuzzleStatus(puzzle.puzzleName, puzzle.date)"
+					@click="puzzleClick(puzzle.puzzleName, puzzle.date)"
 				/>
 			</div>
 		</div>
@@ -35,31 +35,72 @@
 
 <script setup lang="ts">
 
-import {computed} from 'vue';
 
-import {PuzzleName, Status} from '@/types/types';
+import {PuzzleName, Status, Puzzle as IPuzzle} from '@/types/types';
 import Puzzle from './Puzzle.vue';
 import {useStore} from '@/store/store';
+import {PuzzleActions, puzzles, isDailyPuzzle, isWeeklyPuzzle} from '@/utilities/puzzles';
+import {previousDay} from 'date-fns';
 
 
-const dailies: PuzzleName[] = ['NYT', 'WSJ', 'LAT'];
-const weeklies: PuzzleName[] = ['JZ', 'BEQ', 'BEQ2'];
+const dailyPuzzles = puzzles.filter(isDailyPuzzle);
+const weekyPuzzles = puzzles.filter(isWeeklyPuzzle);
 
 const store = useStore();
 
-const dateHistory = computed(() => store.getDateHistory);
+function mapPuzzles(puzzles: IPuzzle[]): {puzzleName: PuzzleName; date: string}[]{
+	return puzzles.map(puzzle => {
+		return {puzzleName: puzzle.name, date: getPuzzleDate(puzzle)};
+	});
+}
 
-function puzzleClick(puzzleName: PuzzleName): void{
-	const selectedDate = store.selectedDate;
-	const dateHist = dateHistory.value;
-	const currentStatus: Status = puzzleName in dateHist ? dateHist[puzzleName] : 'missing';
-	if(currentStatus === 'missing'){
-		store.saveHistory(selectedDate, puzzleName, 'downloaded');
+function getPuzzleDate(puzzle: IPuzzle): string{
+	if(isDailyPuzzle(puzzle)){
+		return store.selectedDate;
 	}
-	else if (currentStatus === 'downloaded'){
-		store.saveHistory(selectedDate, puzzleName, 'played');
+	else{
+		const selectedDate = new Date(store.selectedDate + 'T12:00:00Z');
+		if(selectedDate.getDay() === puzzle.day){
+			return store.selectedDate;
+		}
+		else{
+			return previousDay(selectedDate, puzzle.day).toISOString().split('T')[0];
+		}
 	}
 }
+
+function getPuzzleStatus(puzzleName: PuzzleName, date: string): Status{
+	return store.getDateHistory(date, puzzleName);
+}
+
+async function puzzleClick(puzzleName: PuzzleName, date: string): Promise<void>{
+	const currentStatus: Status = getPuzzleStatus(puzzleName, date);
+	let action = '';
+	let newStatus: null | Status = null;
+	const puzzleActions = new PuzzleActions(store.settings, puzzleName, date);
+	try{
+		if(currentStatus === 'missing' || currentStatus === 'error'){
+			action = 'downloading';
+			await puzzleActions.downloadPuzzle();
+			newStatus = 'downloaded';
+		}
+		else{
+			action = 'opening';
+			puzzleActions.openPuzzle();
+			newStatus = 'played';
+		}
+	}
+	catch(e){
+		store.saveHistory(date, puzzleName, 'error');
+		if(action !== 'opening'){
+			window.electronApi.electron.showErrorBox('Error', `Error ${action} ${puzzleName} for ${date}. \n\nMessage: ${(e as Error).toString()}`);
+		}
+	}
+	if(newStatus !== null){
+		store.saveHistory(date, puzzleName, newStatus);
+	}
+}
+
 
 
 
@@ -68,7 +109,9 @@ function puzzleClick(puzzleName: PuzzleName): void{
 <style scoped>
 
 .puzzlesRow{
-    display: flex;
+    display: grid;
+	grid-template-columns:  32% 32% 32%;
+	row-gap: 3vw;
 }
 
 </style>

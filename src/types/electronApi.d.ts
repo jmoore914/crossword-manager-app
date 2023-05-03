@@ -15,9 +15,21 @@ export interface ElectronApi {
 		};
 		platform: string;
 	};
+	child_process: {
+		exec: (string) => void;
+	};
 	electron: {
 		openDirectory: () => string[];
+		showErrorBox: (title: string, content: string) => void;
+		download: (url: string, saveDir: string, fileName: string) => Promise<Electron.DownloadItem>;
+		fetch: (url: string, method: 'GET' | 'POST' = 'GET', headers: {name: string; value: string}[] = [], body: string | null = null) => Promise<string>;
 	};
+	node: {
+		Buffer: {
+			from: (str: string, econding: BufferEncoding) => Buffer;
+		};
+	};
+
 }
 
 declare global {

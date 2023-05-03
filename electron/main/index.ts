@@ -1,8 +1,13 @@
 import {app, BrowserWindow, shell, ipcMain} from 'electron';
 import {release} from 'node:os';
 import {join} from 'node:path';
+import {download} from 'electron-dl';
+
 
 import {initialize, enable} from '@electron/remote/main';
+
+
+
 
 initialize();
 
@@ -70,7 +75,14 @@ async function createWindow() {
 		// resizable: false,
 	});
 
-	
+	ipcMain.handle('download', (event, props) => {
+		console.log(props.url);
+		return new Promise((resolve, reject) => {
+			download(BrowserWindow.getFocusedWindow(), props.url, {directory: props.saveDir, filename: props.fileName})
+				.then(dl => resolve(dl.getSavePath()))
+				.catch(e => reject(e));
+		});
+	});
 	
 	
 

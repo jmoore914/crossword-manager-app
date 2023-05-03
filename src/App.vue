@@ -29,6 +29,7 @@
 	</div>
 </template>
 
+
 <script setup lang="ts">
 
 import {computed} from 'vue';
@@ -41,9 +42,13 @@ import {settingsDirectory, settingsPath} from '@/utilities/shared';
 import CenteredElement from './components/CenteredElement.vue';
 import Puzzles from './components/Puzzles.vue';
 
+import * as kotwords_custom from './distributions/kotwords';
+
+console.log(kotwords_custom);
+
 const store = useStore();
 
-
+// const a = Puzzleable();
 
 const selectedDate = computed({
 	get: () => store.selectedDate,
