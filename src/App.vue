@@ -41,19 +41,6 @@ import Settings from '@/components/Settings.vue';
 import Puzzles from './components/Puzzles.vue';
 
 
-
-console.log(kotwords.com.jeffpdavidson.kotwords);
-const cell = new kotwords.com.jeffpdavidson.kotwords.model.Cell();
-console.log(cell);
-
-// console.log(kotwords.com.jeffpdavidson.kotwords.model.Puzzle);
-// console.log(kotwords.com.jeffpdavidson.kotwords.model.Puzzle.Cell);
-
-// const grid = [{size: 1}];
-
-// const crossword = new kotwords.com.jeffpdavidson.kotwords.model.Crossword('title', 'creator', 'copyright', 'description', grid);
-// console.log(crossword);
-
 const store = useStore();
 
 

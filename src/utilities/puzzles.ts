@@ -1,16 +1,6 @@
 import {DailyPuzzle, Puzzle, PuzzleName, WeeklyPuzzle, Settings} from '@/types/types';
 import {format} from 'date-fns';
-
-interface PuzzleMetada{
-	title: string;
-	author: string;
-	notes: string | null;
-	height: number;
-	width: number;
-	cluesAcross: string[];
-	cluesDown: string[];
-	rebusIndexes: number[];
-}
+import {Puzzle as PuzzleMetadata} from '../../electron/preload/binaryEncoder/index';
 
 
 
@@ -104,9 +94,9 @@ export class PuzzleActions{
 		// else if(this.puzzleName === 'NY'){
 		// 	await this.downloadNyPuzzle();
 		// }
-		// else if(this.puzzleName === 'NYT'){
-		// 	await this.downloadNytPuzzle();
-		// }
+		else if(this.puzzleName === 'NYT'){
+			await this.downloadNytPuzzle();
+		}
 		else{
 			throw new Error('Unsupported puzzle.');
 		}
@@ -124,45 +114,70 @@ export class PuzzleActions{
 
 		const rebusIndex = 1;
 		const solution: string[] = [];
-		const fill: string[] = [];
-		const rebusBoard: number[] = [];
-		const rebusTable: string[] = [];
-		const markup: string[] = [];
+		const state: string[] = [];
+		const rebus: PuzzleMetadata['rebus'] = {grid: [], solution: {}};
+		const markupGrid: PuzzleMetadata['markupGrid'] = [];
 
-		body.clues.forEach((clue, index) => {
+		body.cells.forEach((clue, index) => {
 			if(objIsEmpty(clue)){
 				solution.push('.');
-				fill.push('.');
-				rebusBoard.push(0);
-				markup.push();
+				state.push('.');
+				rebus.grid!.push(undefined);
+				markupGrid.push({});
 			}
 			else{
 				solution.push(clue.answer.charAt(0));
-				fill.push('-');
+				state.push('-');
 				if(clue.answer.length === 1){
-					rebusBoard.push(0);
+					rebus.grid!.push(undefined);
 				}
 				else{
-					rebusBoard.push(rebusIndex);
-					rebusTable.push(`${rebusIndex}:${clue.answer}`);
+					rebus.grid!.push(rebusIndex);
+					rebus.solution![rebusIndex] = clue.answer;
+				}
+				if(clue.type === 3){
+					markupGrid.push({circled: true});
+				}
+				else{
+					markupGrid.push({});
 				}
 			}
 			
 		});
 
-		const puz: PuzzleMetada = {
-			title: puzJson.title === undefined ? 'NY Times, ' + this.formatDateLong() :  puzJson.title,
+		const puz: PuzzleMetadata = {
 			author: puzJson.constructors.join(','),
-			notes: puzJson.notes === undefined ? null : puzJson.notes.map(note => note.text).join(' '),
-			width: body.dimensions.width,
+			copyright: puzJson.copyright + ', The New York Times',
+			fileVersion: '1.4',
 			height: body.dimensions.height,
+			isScrambled: false,
+			title: puzJson.title === undefined ? 'NY Times, ' + this.formatDateLong() :  puzJson.title,
+			width: body.dimensions.width,
+			solution: solution.join(''),
+			state: state.join(''),
+			clues: body.clues.map(clue => clue.text[0].plain),
+			misc: {
+				unknown1: 0,
+				unknown2: new Uint8Array(12),
+				unknown3: 1,
+				scrambledChecksum: 0
 
-			
-
-
+			}
 		};
-		console.log(puzJson);
-		throw new Error('Error');
+		if(puzJson.notes !== undefined){
+			puz.notepad = puzJson.notes.map(note => note.text).join(' ');
+		}
+		if(!objIsEmpty(rebus!.solution!)){
+			puz.rebus = rebus;
+		}
+		if(markupGrid.length > 0){
+			puz.markupGrid = markupGrid;
+		}
+
+		const buf = window.electronApi.encoder.encode(puz);
+		const fileName = this.getFileName();
+		const path = window.electronApi.path.join(this.downloadLocation, fileName);
+		await window.electronApi.fs.writeFileSync(path, buf);
 	}
 
 	async downloadHerbachPuzzle(): Promise<void>{
@@ -221,8 +236,7 @@ export class PuzzleActions{
 
 
 function decodeHtml(html: string): void{
-	console.Console
-		.console.log('Decoding');
+	console.log('Decoding');
 	const encodedPuzzleMatch = html.match(/window\.puzzleEnv\.rawc\s*=\s*'([^']+)'/);
 	if(encodedPuzzleMatch === null){
 		throw new Error('Unable to fetch encoded puzzle');

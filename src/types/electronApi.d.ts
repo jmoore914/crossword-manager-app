@@ -1,3 +1,5 @@
+import {Puzzle} from '../../electron/preload/binaryEncoder';
+
 export interface ElectronApi {
 	fs: {
 		existsSync: (PathLike) => boolean;
@@ -28,6 +30,9 @@ export interface ElectronApi {
 		Buffer: {
 			from: (str: string, econding: BufferEncoding) => Buffer;
 		};
+	};
+	encoder: {
+		encode: (puz: Puzzle) => Uint8Array;
 	};
 
 }
