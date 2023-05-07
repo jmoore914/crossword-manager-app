@@ -91,9 +91,9 @@ export class PuzzleActions{
 		else if(this.puzzleName === 'BEQ' || this.puzzleName === 'BEQ2'){
 			await this.downloadBeqPuzzle();
 		}
-		// else if(this.puzzleName === 'NY'){
-		// 	await this.downloadNyPuzzle();
-		// }
+		else if(this.puzzleName === 'NY'){
+			await this.downloadNyPuzzle();
+		}
 		else if(this.puzzleName === 'NYT'){
 			await this.downloadNytPuzzle();
 		}
@@ -219,14 +219,18 @@ export class PuzzleActions{
 		const [year, month, day] = this.date.split('-');
 		const pageUrl = `https://www.newyorker.com/puzzles-and-games-dept/crossword/${year}/${month}/${day}`;
 		const pageResp = await window.electronApi.electron.fetch(pageUrl);
+		this.downloadAmuseLabsPuzzle(pageResp);
+		
+	}
+
+	async downloadAmuseLabsPuzzle(pageResp: string): Promise<void>{
 		const puzUrlRegex = /data-src="(https:\/\/cdn3\.amuselabs.com\/tny\/crossword\?id=.*?)&src/;
 		const puzUrlMatch = pageResp.match(puzUrlRegex);
 		if(puzUrlMatch === null){
 			throw new Error('Failed to find "https://cdn3.amuselabs.com..." in page.');
 		}
 		else{
-			const puzResp = await window.electronApi.electron.fetch(puzUrlMatch[1]);
-			decodeHtml(puzResp);
+			decodeHtml(puzUrlMatch[1]);
 		}
 	}
 
@@ -235,20 +239,86 @@ export class PuzzleActions{
 
 
 
-function decodeHtml(html: string): void{
+async function decodeHtml(puzUrl: string): Promise<JSON>{
 	console.log('Decoding');
-	const encodedPuzzleMatch = html.match(/window\.puzzleEnv\.rawc\s*=\s*'([^']+)'/);
+	const puzResp = await window.electronApi.electron.fetch(puzUrl);
+	const encodedPuzzleMatch = puzResp.match(/window\.puzzleEnv\.rawc\s*=\s*'([^']+)'/);
 	if(encodedPuzzleMatch === null){
 		throw new Error('Unable to fetch encoded puzzle');
 	}
 	else{
-		const encodedPuzzle = encodedPuzzleMatch[1].replace('window.rawc = ', '').replaceAll('\'', '');
-		console.log(encodedPuzzle);
-		const decodedPuzzle = window.electronApi.node.Buffer.from(encodedPuzzle, 'base64').toString('utf8');
-		// console.log(decodedPuzzle);
+		const rawc = encodedPuzzleMatch[1].replace('window.rawc = ', '').replaceAll('\'', '');
+		const m1 = puzResp.match(/"([^"]+c-min.js[^"]+)"/);
+		console.log(m1![1]);
+		const jsResp = await window.electronApi.electron.fetch(puzUrl + m1![1]);
+
+
+		const m2 = jsResp.match(/="([0-9a-f]{7})"/);
+
+		const amuseKey = m2 === null? null : m2[1];
+
+		console.log(amuseKey);
+
+		const decodedPuzzle = loadRawc(rawc, amuseKey);
+		console.log(decodedPuzzle);
 		throw new Error('Error');
 	}
 }
+
+function loadRawc(rawc: string, amuseKey: string | null = null): JSON {
+	try {
+		console.log('Case 1');
+		return b64ToJson(rawc);
+	} catch {
+		try {
+			console.log('Case 2');
+			const E = rawc.split('.');
+			const A = Array.from(E[0]);
+			const H = E[1].split('').reverse().join('');
+			const F = Array.from(H).map(c => parseInt(c, 16) + 2);
+			let B = 0; let G = 0;
+			while (B < A.length - 1) {
+				const C = Math.min(F[G % F.length], A.length - B);
+				for (let D = 0; D < Math.floor(C / 2); D++) {
+					[A[B + D], A[B + C - D - 1]] = [A[B + C - D - 1], A[B + D]];
+				}
+				B += C;
+				G += 1;
+			}
+			const newRawc = A.join('');
+			return b64ToJson(newRawc);
+		} catch {
+			console.log('Case 3');
+			return b64ToJson(loadRawcWithKey(rawc, amuseKey));
+		}
+	}
+}
+
+function b64ToJson(b64String: string): JSON{
+	return JSON.parse(window.electronApi.node.Buffer.from(b64String, 'base64').toString('utf8'));
+}
+
+function loadRawcWithKey(e: string, amuseKey: string | null): string {
+	const E = Array.from(e);
+	const H = Array.from(amuseKey || '');
+	const F = H.map(c => parseInt(c, 16));
+	let G = 0; const I = E.length - 1;
+	for (let A = 0; A < I; ) {
+		const B = F[G % F.length] + 2;
+		const L = I - A + 1;
+		let C = A;
+		let D = A + Math.min(B, L) - 1;
+		while (C < D) {
+			[E[C], E[D]] = [E[D], E[C]];
+			C += 1;
+			D -= 1;
+		}
+		A += B;
+		G += 1;
+	}
+	return E.join('');
+}
+
 
 
 
