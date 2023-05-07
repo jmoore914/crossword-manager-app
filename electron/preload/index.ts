@@ -45,6 +45,11 @@ contextBridge.exposeInMainWorld('electronApi', {
 	
 });
 
+
+
+// import * as kotwords from './kotwords';
+// console.log(com.jeffpdavidson.kotwords.model.Test);
+
 // const buf = getBuf();
 // console.log(buf);
 // console.log(buf.toString());
