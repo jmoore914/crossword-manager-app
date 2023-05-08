@@ -4,11 +4,9 @@ Electron/Vue app for downloading and launching crosswords in the .puz file type.
 
 ![Screenshot](/public/screenShot.png?raw=true)
 
-This project is a work in progress. Currently, the app only has the capability of downloading puzzles from sources that publush .puz puzzles.
-
 TODO:
-- Finish binaryEncoder module to be able to download from more sources including NYT and apps that use amuselabs
-- Integrate an dialog for logging into NYT and extracting the necessary cookies
+- Integrate  dialog for logging into NYT and extracting the necessary cookies
+- Add loading animation when fetching puzzling
 
 
 ## Installation
@@ -25,3 +23,10 @@ npm run dev
 ```
 
 
+# Acknowledgements
+
+Huge props to the following who made this app possible:
+
+Andrew Hyndman - His excellent work in his [puz](https://github.com/ajhyndman/puz) project is used to encode puzzles into the Across Lite .puz format.
+
+ Parker Higgins - [xlword-dl](https://github.com/thisisparker/xword-dl) was the basis for decoding the obfuscated/encoded puzzles from Amuselabs.
