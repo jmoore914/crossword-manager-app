@@ -6,7 +6,7 @@ Electron/Vue app for downloading and launching crosswords in the .puz file type.
 
 TODO:
 - Integrate  dialog for logging into NYT and extracting the necessary cookies
-- Add loading animation when fetching puzzling
+- Properly type NYT json
 
 
 ## Installation

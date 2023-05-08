@@ -62,7 +62,7 @@ function getSrc(): string {
 }
 
 .downloaded{
-    --icon-color: black;
+    --icon-color: #817f7f;
 }
 
 .played{
