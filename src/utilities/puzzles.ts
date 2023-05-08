@@ -22,7 +22,7 @@ export const puzzles: Puzzle[] = [
 	{name: 'NYT', schedule: 'daily'},
 	{name: 'WSJ', schedule: 'daily', herbachName: 'wsj'},
 	{name: 'NY', schedule: 'daily'},
-	{name: 'JZ', schedule: 'weekly', day: 4, herbachName: 'JZ'},
+	{name: 'JZ', schedule: 'weekly', day: 4, herbachName: 'Jonesin'},
 	{name: 'BEQ', schedule: 'weekly', day: 4},
 	{name: 'BEQ2', schedule: 'weekly', day: 1},
 	{name: 'WP', schedule: 'weekly', day: 0, herbachName: 'WaPo'}
