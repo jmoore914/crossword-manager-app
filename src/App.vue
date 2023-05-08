@@ -1,6 +1,7 @@
 <template>
 	<div class="app">
 		<Settings />
+		<Loader />
 		<div>
 			<img
 				:src="settingsIconSrc"
@@ -39,6 +40,7 @@ import {useStore} from '@/store/store';
 
 import Settings from '@/components/Settings.vue';
 import Puzzles from './components/Puzzles.vue';
+import Loader from './components/Loader.vue';
 
 
 const store = useStore();

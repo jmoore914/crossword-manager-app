@@ -71,7 +71,7 @@ async function createWindow() {
 		webPreferences: {
 			preload,
 			sandbox: false,
-			devTools: false
+			// devTools: false
 		},
 		// resizable: false,
 	});

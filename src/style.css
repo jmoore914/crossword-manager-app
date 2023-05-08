@@ -25,6 +25,19 @@
   transform: translateX(-50%);
 }
 
+.verticallyCenter{
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.center{
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+
+
 .flexHCenter{
   display: flex;
   width: 100%;

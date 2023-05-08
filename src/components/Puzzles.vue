@@ -80,6 +80,7 @@ async function puzzleClick(puzzleName: PuzzleName, date: string): Promise<void>{
 	const puzzleActions = new PuzzleActions(store.settings, puzzleName, date);
 	try{
 		if(currentStatus === 'missing' || currentStatus === 'error'){
+			store.displayLoading();
 			action = 'downloading';
 			await puzzleActions.downloadPuzzle();
 			newStatus = 'downloaded';
@@ -96,6 +97,7 @@ async function puzzleClick(puzzleName: PuzzleName, date: string): Promise<void>{
 			window.electronApi.electron.showErrorBox('Error', `Error ${action} ${puzzleName} for ${date}. \n\nMessage: ${(e as Error).toString()}`);
 		}
 	}
+	store.hideLoading();
 	if(newStatus !== null){
 		store.saveHistory(date, puzzleName, newStatus);
 	}

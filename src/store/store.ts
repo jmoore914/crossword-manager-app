@@ -5,6 +5,7 @@ import {defineStore} from 'pinia';
 interface StoreState{
 	showSettingsModal: boolean;
 	showSettingsContainer: boolean;
+	showLoading: boolean;
 	selectedDate: string;
 	history: History;
 	settings: Settings;
@@ -15,6 +16,7 @@ export const useStore = defineStore('store', {
 		return {
 			showSettingsModal: false,
 			showSettingsContainer: false,
+			showLoading: false,
 			selectedDate: new Date().toISOString().split('T')[0],
 			history: {},
 			settings: {
@@ -99,6 +101,14 @@ export const useStore = defineStore('store', {
 			const newDateHistory = {...oldDateHistory, [puzzleName]: status} as DateHistory;
 			this.history[date] = newDateHistory;
 			window.electronApi.fs.writeFileSync(window.electronApi.path.join(this.settings.downloadLocation, 'history.json'), JSON.stringify(this.history, null, 2));
+		},
+
+		displayLoading(){
+			this.showLoading = true;
+		},
+
+		hideLoading(){
+			this.showLoading = false;
 		}
 	}
 });
