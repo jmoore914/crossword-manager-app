@@ -19,3 +19,15 @@ export function getKeys<T>(obj: T): (keyof T)[]{
 	}
 	return keys;
 }
+
+export function objIsEmpty(obj: object): boolean{
+	return Object.keys(obj).length === 0;
+}
+
+export function cloneObj<T>(obj: T): T {
+	return JSON.parse(JSON.stringify(obj));
+}
+
+export function range(i: number): number[] {
+	return [...Array(i).keys()];
+}

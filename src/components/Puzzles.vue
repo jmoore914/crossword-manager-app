@@ -111,7 +111,7 @@ async function puzzleClick(puzzleName: PuzzleName, date: string): Promise<void>{
 .puzzlesRow{
     display: grid;
 	grid-template-columns:  32% 32% 32%;
-	row-gap: 3vw;
+	row-gap: 5vw;
 }
 
 </style>

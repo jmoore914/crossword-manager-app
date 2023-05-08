@@ -1,12 +1,12 @@
 import {DailyPuzzle, Puzzle, PuzzleName, WeeklyPuzzle, Settings} from '@/types/types';
 import {format} from 'date-fns';
 import {Puzzle as PuzzleMetadata} from '../../electron/preload/binaryEncoder/index';
+import {nytJsonToPuzzle} from './nyt';
+import {decodeAmuseLabsPuzzle} from './amuselabs';
 
 
 
-function objIsEmpty(obj: object): boolean{
-	return Object.keys(obj).length === 0;
-}
+
 
 export function isDailyPuzzle(puzzle: Puzzle): puzzle is DailyPuzzle {
 	return puzzle.schedule === 'daily';
@@ -54,6 +54,14 @@ export class PuzzleActions{
 
 	formatDateLong(): string {
 		return this.formatDate('EEEE, MMMM d, yyyy'); 
+	}
+
+	getCopyright(): string {
+		return  `${this.date.split('-')[0]}, ${this.puzzleName}`;
+	}
+
+	getPuzzleTitle(): string {
+		return `${this.puzzleName}, ${this.formatDateLong()}`;
 	}
 
 	getFileName(): string {
@@ -108,80 +116,12 @@ export class PuzzleActions{
 		}
 		const url = `https://www.nytimes.com/svc/crosswords/v6/puzzle/daily/${this.date}.json`;
 		const resp = await window.electronApi.electron.fetch(url, 'GET', [{name: 'NYT-S', value: this.nytCookie}]);
-		console.log(resp);
 		const puzJson = JSON.parse(resp);
-		const body = puzJson.body[0];
-
-		const rebusIndex = 1;
-		const solution: string[] = [];
-		const state: string[] = [];
-		const rebus: PuzzleMetadata['rebus'] = {grid: [], solution: {}};
-		const markupGrid: PuzzleMetadata['markupGrid'] = [];
-
-		body.cells.forEach((clue, index) => {
-			if(objIsEmpty(clue)){
-				solution.push('.');
-				state.push('.');
-				rebus.grid!.push(undefined);
-				markupGrid.push({});
-			}
-			else{
-				solution.push(clue.answer.charAt(0));
-				state.push('-');
-				if(clue.answer.length === 1){
-					rebus.grid!.push(undefined);
-				}
-				else{
-					rebus.grid!.push(rebusIndex);
-					rebus.solution![rebusIndex] = clue.answer;
-				}
-				if(clue.type === 3){
-					markupGrid.push({circled: true});
-				}
-				else{
-					markupGrid.push({});
-				}
-			}
-			
-		});
-
-		const puz: PuzzleMetadata = {
-			author: puzJson.constructors.join(','),
-			copyright: puzJson.copyright + ', The New York Times',
-			fileVersion: '1.4',
-			height: body.dimensions.height,
-			isScrambled: false,
-			title: puzJson.title === undefined ? 'NY Times, ' + this.formatDateLong() :  puzJson.title,
-			width: body.dimensions.width,
-			solution: solution.join(''),
-			state: state.join(''),
-			clues: body.clues.map(clue => clue.text[0].plain),
-			misc: {
-				unknown1: 0,
-				unknown2: new Uint8Array(12),
-				unknown3: 1,
-				scrambledChecksum: 0
-
-			}
-		};
-		if(puzJson.notes !== undefined){
-			puz.notepad = puzJson.notes.map(note => note.text).join(' ');
-		}
-		if(!objIsEmpty(rebus!.solution!)){
-			puz.rebus = rebus;
-		}
-		if(markupGrid.length > 0){
-			puz.markupGrid = markupGrid;
-		}
-
-		const buf = window.electronApi.encoder.encode(puz);
-		const fileName = this.getFileName();
-		const path = window.electronApi.path.join(this.downloadLocation, fileName);
-		await window.electronApi.fs.writeFileSync(path, buf);
+		const puz = nytJsonToPuzzle(puzJson, this.formatDateLong());
+		await this.savePuzzleObject(puz);
 	}
 
 	async downloadHerbachPuzzle(): Promise<void>{
-
 		const puzzle = puzzles.find(puz => puz.name === this.puzzleName);
 		if(puzzle === undefined || puzzle.herbachName === undefined){
 			throw new Error('Invalid Herbach puzzle');
@@ -219,7 +159,7 @@ export class PuzzleActions{
 		const [year, month, day] = this.date.split('-');
 		const pageUrl = `https://www.newyorker.com/puzzles-and-games-dept/crossword/${year}/${month}/${day}`;
 		const pageResp = await window.electronApi.electron.fetch(pageUrl);
-		this.downloadAmuseLabsPuzzle(pageResp);
+		await this.downloadAmuseLabsPuzzle(pageResp);
 		
 	}
 
@@ -230,94 +170,27 @@ export class PuzzleActions{
 			throw new Error('Failed to find "https://cdn3.amuselabs.com..." in page.');
 		}
 		else{
-			decodeHtml(puzUrlMatch[1]);
+			const puz = await decodeAmuseLabsPuzzle(puzUrlMatch[1]);
+			puz.copyright = puz.copyright || this.getCopyright();
+			puz.title = puz.title || this.getPuzzleTitle();
+			await this.savePuzzleObject(puz);
+
 		}
 	}
 
-}
-
-
-
-
-async function decodeHtml(puzUrl: string): Promise<JSON>{
-	console.log('Decoding');
-	const puzResp = await window.electronApi.electron.fetch(puzUrl);
-	const encodedPuzzleMatch = puzResp.match(/window\.puzzleEnv\.rawc\s*=\s*'([^']+)'/);
-	if(encodedPuzzleMatch === null){
-		throw new Error('Unable to fetch encoded puzzle');
+	async savePuzzleObject(puz: PuzzleMetadata): Promise<void>{
+		const buf = window.electronApi.encoder.encode(puz);
+		const fileName = this.getFileName();
+		const path = window.electronApi.path.join(this.downloadLocation, fileName);
+		await window.electronApi.fs.writeFileSync(path, buf);
 	}
-	else{
-		const rawc = encodedPuzzleMatch[1].replace('window.rawc = ', '').replaceAll('\'', '');
-		const m1 = puzResp.match(/"([^"]+c-min.js[^"]+)"/);
-		console.log(m1![1]);
-		const jsResp = await window.electronApi.electron.fetch(puzUrl + m1![1]);
 
-
-		const m2 = jsResp.match(/="([0-9a-f]{7})"/);
-
-		const amuseKey = m2 === null? null : m2[1];
-
-		console.log(amuseKey);
-
-		const decodedPuzzle = loadRawc(rawc, amuseKey);
-		console.log(decodedPuzzle);
-		throw new Error('Error');
-	}
 }
 
-function loadRawc(rawc: string, amuseKey: string | null = null): JSON {
-	try {
-		console.log('Case 1');
-		return b64ToJson(rawc);
-	} catch {
-		try {
-			console.log('Case 2');
-			const E = rawc.split('.');
-			const A = Array.from(E[0]);
-			const H = E[1].split('').reverse().join('');
-			const F = Array.from(H).map(c => parseInt(c, 16) + 2);
-			let B = 0; let G = 0;
-			while (B < A.length - 1) {
-				const C = Math.min(F[G % F.length], A.length - B);
-				for (let D = 0; D < Math.floor(C / 2); D++) {
-					[A[B + D], A[B + C - D - 1]] = [A[B + C - D - 1], A[B + D]];
-				}
-				B += C;
-				G += 1;
-			}
-			const newRawc = A.join('');
-			return b64ToJson(newRawc);
-		} catch {
-			console.log('Case 3');
-			return b64ToJson(loadRawcWithKey(rawc, amuseKey));
-		}
-	}
-}
 
-function b64ToJson(b64String: string): JSON{
-	return JSON.parse(window.electronApi.node.Buffer.from(b64String, 'base64').toString('utf8'));
-}
 
-function loadRawcWithKey(e: string, amuseKey: string | null): string {
-	const E = Array.from(e);
-	const H = Array.from(amuseKey || '');
-	const F = H.map(c => parseInt(c, 16));
-	let G = 0; const I = E.length - 1;
-	for (let A = 0; A < I; ) {
-		const B = F[G % F.length] + 2;
-		const L = I - A + 1;
-		let C = A;
-		let D = A + Math.min(B, L) - 1;
-		while (C < D) {
-			[E[C], E[D]] = [E[D], E[C]];
-			C += 1;
-			D -= 1;
-		}
-		A += B;
-		G += 1;
-	}
-	return E.join('');
-}
+
+
 
 
 

@@ -80,6 +80,10 @@ function getSrc(): string {
     padding: calc(.5 * var(--base-size));
 }
 
+.statusIcon:hover{
+	cursor: pointer;
+}
+
 .statusIconContainer{
     border: calc(.2 * var(--base-size)) solid var(--icon-color);
     /* width: calc(3 * var(--base-size)); */

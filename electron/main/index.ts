@@ -70,7 +70,8 @@ async function createWindow() {
 		height: 600,
 		webPreferences: {
 			preload,
-			sandbox: false
+			sandbox: false,
+			devTools: false
 		},
 		// resizable: false,
 	});
