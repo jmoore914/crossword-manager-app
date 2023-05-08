@@ -1,7 +1,44 @@
 import {Puzzle as PuzzleMetadata} from '../../electron/preload/binaryEncoder';
 import {cloneObj, objIsEmpty} from './shared';
 
-export function nytJsonToPuzzle(puzJson, dateLong: string): PuzzleMetadata {
+export interface NytJson{
+	body: Body[];
+	constructors: string[];
+	copyright?: string;
+	title?: string;
+	notes: Note[];
+}
+
+interface Body{
+	cells: (Cell | Empty)[];
+	clues: Clue[];
+	dimensions: Dimensions;
+}
+
+type Empty = Record<string, never>;
+
+interface Cell {
+	answer: string;
+	type: number;
+}
+
+interface Clue{
+	direction: 'Across' | 'Down';
+	label: string;
+	text: {plain: string}[];
+}
+
+interface Dimensions {
+	height: number;
+	width: number;
+}
+
+interface Note {
+	text: string[];
+	platforms: boolean[];
+}
+
+export function nytJsonToPuzzle(puzJson: NytJson, dateLong: string): PuzzleMetadata {
 	const body = puzJson.body[0];
 
 	let rebusIndex = 1;

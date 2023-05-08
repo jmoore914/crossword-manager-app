@@ -1,7 +1,7 @@
 import {DailyPuzzle, Puzzle, PuzzleName, WeeklyPuzzle, Settings} from '@/types/types';
 import {format} from 'date-fns';
 import {Puzzle as PuzzleMetadata} from '../../electron/preload/binaryEncoder/index';
-import {nytJsonToPuzzle} from './nyt';
+import {NytJson, nytJsonToPuzzle} from './nyt';
 import {decodeAmuseLabsPuzzle} from './amuselabs';
 
 
@@ -116,7 +116,7 @@ export class PuzzleActions{
 		}
 		const url = `https://www.nytimes.com/svc/crosswords/v6/puzzle/daily/${this.date}.json`;
 		const resp = await window.electronApi.electron.fetch(url, 'GET', [{name: 'NYT-S', value: this.nytCookie}]);
-		const puzJson = JSON.parse(resp);
+		const puzJson = JSON.parse(resp) as unknown as NytJson;
 		const puz = nytJsonToPuzzle(puzJson, this.formatDateLong());
 		await this.savePuzzleObject(puz);
 	}
