@@ -6,6 +6,8 @@ interface StoreState{
 	showSettingsModal: boolean;
 	showSettingsContainer: boolean;
 	showLoading: boolean;
+	showLogin: boolean;
+	showLoginContainer: boolean;
 	selectedDate: string;
 	history: History;
 	settings: Settings;
@@ -17,6 +19,8 @@ export const useStore = defineStore('store', {
 			showSettingsModal: false,
 			showSettingsContainer: false,
 			showLoading: false,
+			showLogin: false,
+			showLoginContainer: false,
 			selectedDate: new Date().toISOString().split('T')[0],
 			history: {},
 			settings: {
@@ -109,6 +113,19 @@ export const useStore = defineStore('store', {
 
 		hideLoading(){
 			this.showLoading = false;
-		}
+		},
+
+		displayLogin(){
+			this.showLoginContainer = true;
+			this.showLogin = true;
+		},
+
+		hideLogin(){
+			this.showLogin = false;
+		},
+
+		hideLoginContainer(): void {
+			this.showLoginContainer = false;
+		},
 	}
 });

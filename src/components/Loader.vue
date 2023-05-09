@@ -30,6 +30,8 @@ const show = computed(() => store.showLoading);
     top: 0;
     left: 0;
     overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 10000
 }
 
 .smallContainer{
@@ -45,7 +47,6 @@ const show = computed(() => store.showLoading);
     aspect-ratio: 1;  
     animation: spin 2s linear infinite;
     margin: 0;
-    /* position: absolute; */
 }
 
 @keyframes spin {

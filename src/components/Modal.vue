@@ -13,9 +13,14 @@
 			>
 				<div
 					class="modalBackground"
+					:style="{zIndex: zIndex}"
+					:class="{blurredBackground: blurredBackground}"
 					@click="emit('close')"
 				/>
-				<div class="modal horizontallyCenter">
+				<div
+					class="modal horizontallyCenter"
+					:style="{zIndex: zIndex + 1}"
+				>
 					<slot />
 				</div>
 			</div>
@@ -25,10 +30,15 @@
 
 <script setup lang="ts">
 
-defineProps<{
+withDefaults(defineProps<{
 	showContainer: boolean;
 	showModal: boolean;
-}>();
+	zIndex?: number;
+	blurredBackground?: boolean;
+}>(), {
+	zIndex: 999,
+	blurredBackground: true
+});
 
 
 const emit = defineEmits<{
@@ -48,9 +58,13 @@ const emit = defineEmits<{
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.4);
     padding-top:calc(2 * var(--base-size));
 }
+
+.blurredBackground {
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
 .modal {
   padding:calc(2 * var(--base-size));
   background-color: #fefefe;

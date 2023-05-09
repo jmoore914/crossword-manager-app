@@ -117,3 +117,32 @@ export function nytJsonToPuzzle(puzJson: NytJson, dateLong: string): PuzzleMetad
 	}
 	return puz;
 }
+
+interface NytAuthResponse{
+	data: {
+		cookies: {name: string; cipheredValue: string}[];
+	};
+}
+
+export async function authenticate(username: string, password: string): Promise<string>{
+	const url = 'https://myaccount.nytimes.com/svc/ios/v2/login';
+	const data = {'login': username, 'password': password};
+	const headers = [
+		{name: 'User-Agent', value: 'Crossword/1844.220922 CFNetwork/1335.0.3 Darwin/21.6.0'},
+		{name: 'client_id', value: 'ios.crosswords'}
+	];
+		
+	const resp = await window.electronApi.electron.fetch(url, 'POST', headers, JSON.stringify(data));
+
+	const authResp = JSON.parse(resp) as unknown as NytAuthResponse;
+
+	const nytS = authResp.data.cookies.find(cookie => cookie.name === 'NYT-S');
+	if(nytS === undefined){
+		throw new Error('Unable to find cookie in authentication response.');
+	}
+	else{
+		return nytS.cipheredValue;
+	}
+
+        
+}

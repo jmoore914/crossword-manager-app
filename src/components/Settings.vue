@@ -27,7 +27,12 @@
 					v-model="settings.nytCookie"
 					class="settingsInput textInput"
 				>
-				<div />
+				<img
+					:src="lockIconSrc"
+					alt="login"
+					class="img hoverable lockIcon icon"
+					@click="openLogin"
+				>
 			</div>
 			<div class="buttons">
 				<button
@@ -53,9 +58,9 @@ import {computed, ref} from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import {useStore} from '@/store/store';
-import {settingsPath} from '@/utilities/shared';
 
 import folderIconSrc from '@/assets/folderIcon.svg';
+import lockIconSrc from '@/assets/lockIcon.svg';
 
 
 const store = useStore();
@@ -75,6 +80,11 @@ function openDialog(): void{
 	if(selectedDirectory.length === 1){
 		settings.value.downloadLocation = selectedDirectory[0];
 	}
+}
+
+function openLogin(): void{
+	close();
+	store.displayLogin();
 }
 
 function saveSettings(): void{
