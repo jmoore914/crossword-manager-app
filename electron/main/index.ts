@@ -53,6 +53,7 @@ export let win: BrowserWindow | null = null;
 const preload = join(__dirname, '../preload/index.js');
 const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, 'index.html');
+console.log(indexHtml);
 
 
 
@@ -89,8 +90,7 @@ async function createWindow() {
 
 	if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
 		win.loadURL(url);
-		// Open devTool if the app is not packaged
-		win.webContents.openDevTools();
+
 	} else {
 		win.loadFile(indexHtml);
 	}

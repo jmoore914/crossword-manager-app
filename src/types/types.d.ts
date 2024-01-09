@@ -1,6 +1,7 @@
 export interface Settings{
 	nytCookie: string;
 	downloadLocation: string;
+	backupLocation?: string;
 }
 
 export type PuzzleName = 'NYT' | 'WSJ' | 'NY' | 'JZ' | 'BEQ' | 'BEQ2' | 'WP';

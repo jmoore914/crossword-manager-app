@@ -105,6 +105,9 @@ export const useStore = defineStore('store', {
 			const newDateHistory = {...oldDateHistory, [puzzleName]: status} as DateHistory;
 			this.history[date] = newDateHistory;
 			window.electronApi.fs.writeFileSync(window.electronApi.path.join(this.settings.downloadLocation, 'history.json'), JSON.stringify(this.history, null, 2));
+			if(this.settings.backupLocation){
+				window.electronApi.fs.writeFileSync(window.electronApi.path.join(this.settings.backupLocation, 'history_backup.json'), JSON.stringify(this.history, null, 2));
+			}
 		},
 
 		displayLoading(){

@@ -1,6 +1,6 @@
 {
   "name": "crossword-manager-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "dist-electron/main/index.js",
   "description": "app to download and open crossword puzzles in .puz format",
   "author": "jmoore914",
@@ -20,15 +20,22 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "vue-tsc --noEmit && vite build && electron-builder && electron-forge make"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.1.1",
+    "@electron-forge/maker-deb": "^6.1.1",
+    "@electron-forge/maker-rpm": "^6.1.1",
+    "@electron-forge/maker-squirrel": "^6.1.1",
+    "@electron-forge/maker-zip": "^6.1.1",
     "@electron/remote": "^2.0.9",
     "@types/python-struct": "^1.0.1",
     "@vitejs/plugin-vue": "^4.1.0",
     "@vue/eslint-config-typescript": "^11.0.2",
-    "electron": "^24.1.2",
-    "electron-builder": "^24.1.2",
+    "electron": "^24.2.0",
     "eslint": "^8.38.0",
     "eslint-plugin-vue": "^9.11.0",
     "typescript": "^5.0.2",
@@ -41,6 +48,7 @@
   "dependencies": {
     "date-fns": "^2.29.3",
     "electron-dl": "^3.5.0",
+    "electron-squirrel-startup": "^1.0.0",
     "iconv-lite": "^0.6.3",
     "pinia": "^2.0.35",
     "python-struct": "^1.1.3",

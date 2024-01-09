@@ -33,7 +33,6 @@
 				</button>
 				<button
 					class="button blueButton primaryButton"
-					@click="login"
 				>
 					Login
 				</button>

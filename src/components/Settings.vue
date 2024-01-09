@@ -19,7 +19,20 @@
 					:src="folderIconSrc"
 					alt="open"
 					class="img hoverable folderIcon icon"
-					@click="openDialog"
+					@click="openDialog('downloadLocation')"
+				>
+				<div>
+					Backup Location:
+				</div>
+				<input
+					v-model="settings.backupLocation"
+					class="textInput"
+				>
+				<img
+					:src="folderIconSrc"
+					alt="open"
+					class="img hoverable folderIcon icon"
+					@click="openDialog('backupLocation')"
 				>
                 
 				<div>NYT Cookie:</div>
@@ -72,13 +85,14 @@ const loadedSettings = computed(() => store.settings);
 
 const settings = ref({
 	downloadLocation: loadedSettings.value.downloadLocation,
+	backupLocation: loadedSettings.value.backupLocation,
 	nytCookie: loadedSettings.value.nytCookie
 });
 
-function openDialog(): void{
+function openDialog(type: 'downloadLocation' | 'backupLocation'): void{
 	const selectedDirectory = window.electronApi.electron.openDirectory();
 	if(selectedDirectory.length === 1){
-		settings.value.downloadLocation = selectedDirectory[0];
+		settings.value[type] = selectedDirectory[0];
 	}
 }
 
